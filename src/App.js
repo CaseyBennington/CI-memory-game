@@ -24,10 +24,13 @@ function App() {
   const [matched, setMatched] = useState([]); // card.id
   const [moves, setMoves] = useState(0);
   const [winner, setWinner] = useState(false);
+  const [highScore, setHighScore] = useState(0);
 
   // Create the card desk on load
   useEffect(() => {
     createCardDeck(6);
+    const jsonScore = JSON.stringify(0);
+    localStorage.setItem("highScore", jsonScore);
   }, []);
 
   // Hook to handle when the difficulty changes
@@ -65,6 +68,7 @@ function App() {
     if (matched.length !== 0 && matched.length * 2 === cards.length) {
       setTimeout(() => {
         setWinner(true);
+        handlHighScore();
       }, 500);
     }
   }, [cards, matched]);
@@ -73,6 +77,27 @@ function App() {
   function handleDifficulty(e) {
     setDifficulty(e.target.value);
     handleReset();
+  }
+
+  function handlHighScore() {
+    let score = 0;
+
+    if (difficulty === "easy") {
+      score = matched.length * 7 - moves;
+    } else if (difficulty === "medium") {
+      score = matched.length * 8 - moves;
+    } else if (difficulty === "hard") {
+      score = matched.length * 9 - moves;
+    }
+
+    let currentHighScore = localStorage.getItem("highScore");
+    currentHighScore = JSON.parse(currentHighScore);
+
+    if (currentHighScore < score) {
+      setHighScore(score);
+      const jsonScore = JSON.stringify(score);
+      localStorage.setItem("highScore", jsonScore);
+    }
   }
 
   // Create the random card deck based on the difficulty.
@@ -124,6 +149,7 @@ function App() {
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
         </select>
+        <p>{highScore}</p>
         <p>
           {moves} <strong>moves</strong>
         </p>
